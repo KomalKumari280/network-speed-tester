@@ -10,22 +10,27 @@ def index():
 @app.route('/run-test')
 def run_test():
     try:
-        st = speedtest.Speedtest()
+        # Initialize speedtest with secure=True for cloud compatibility
+        st = speedtest.Speedtest(secure=True)
         st.get_best_server()
         
-        # Performance results
-        ping = round(st.results.ping, 2)
-        download = round(st.download() / 1_000_000, 2) # Convert to Mbps
-        upload = round(st.upload() / 1_000_000, 2)     # Convert to Mbps
+        # Perform the measurements
+        download_speed = round(st.download() / 1_000_000, 2)
+        upload_speed = round(st.upload() / 1_000_000, 2)
+        ping_res = round(st.results.ping, 2)
         
         return jsonify({
-            'ping': ping,
-            'download': download,
-            'upload': upload,
-            'jitter': round(st.results.client['lat'], 2) # Estimation
+            'download': download_speed,
+            'upload': upload_speed,
+            'ping': ping_res,
+            'status': 'success'
         })
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        print(f"Detailed Server Error: {e}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
