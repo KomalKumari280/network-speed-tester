@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Speed Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a, #020617);
+            color: white;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-glow {
+            background: linear-gradient(90deg, #6366f1, #06b6d4);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn-glow:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.6);
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-8">
+
+    <div class="text-center mb-12">
+        <h1 class="text-5xl font-bold mb-4">Test your <span class="text-blue-400">connection.</span></h1>
+        <p class="text-slate-400">Real-time download, upload, and latency measured from your browser.</p>
+    </div>
+
+    <div class="glass-card w-full max-w-4xl rounded-3xl p-12 mb-6 flex flex-col items-center">
+        <div class="relative w-64 h-64 flex items-center justify-center border-8 border-slate-800 rounded-full mb-8">
+            <div class="text-center">
+                <span id="main-speed" class="text-6xl font-bold">0.00</span>
+                <p class="text-slate-400 uppercase tracking-widest text-sm">Mbps</p>
+                <p id="status-text" class="text-xs text-blue-400 mt-2">Idle</p>
+            </div>
+        </div>
+        <button onclick="startTest()" id="test-btn" class="btn-glow px-12 py-4 rounded-full font-bold text-lg">
+            Start Test
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl mb-6">
+        <div class="glass-card p-6 rounded-2xl flex items-center space-x-4">
+            <div class="bg-indigo-900/50 p-3 rounded-lg text-indigo-400">🕒</div>
+            <div>
+                <p class="text-xs text-slate-400 uppercase">Ping</p>
+                <p class="text-xl font-bold"><span id="ping-val">—</span> <span class="text-sm font-normal">MS</span></p>
+            </div>
+        </div>
+        <div class="glass-card p-6 rounded-2xl flex items-center space-x-4">
+            <div class="bg-blue-900/50 p-3 rounded-lg text-blue-400">⬇</div>
+            <div>
+                <p class="text-xs text-slate-400 uppercase">Download</p>
+                <p class="text-xl font-bold"><span id="dl-val">—</span> <span class="text-sm font-normal">MBPS</span></p>
+            </div>
+        </div>
+        <div class="glass-card p-6 rounded-2xl flex items-center space-x-4">
+            <div class="bg-emerald-900/50 p-3 rounded-lg text-emerald-400">⬆</div>
+            <div>
+                <p class="text-xs text-slate-400 uppercase">Upload</p>
+                <p class="text-xl font-bold"><span id="ul-val">—</span> <span class="text-sm font-normal">MBPS</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function startTest() {
+            const btn = document.getElementById('test-btn');
+            const status = document.getElementById('status-text');
+            
+            btn.disabled = true;
+            btn.innerText = "Testing...";
+            status.innerText = "Running speed test...";
+
+            try {
+                const response = await fetch('/run-test');
+                const data = await response.json();
+
+                document.getElementById('main-speed').innerText = data.download;
+                document.getElementById('dl-val').innerText = data.download;
+                document.getElementById('ul-val').innerText = data.upload;
+                document.getElementById('ping-val').innerText = data.ping;
+                status.innerText = "Finished";
+            } catch (error) {
+                status.innerText = "Error running test";
+                console.error(error);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Start Test";
+            }
+        }
+    </script>
+</body>
+</html>
